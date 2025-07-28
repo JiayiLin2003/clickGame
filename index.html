@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>可爱的点击游戏 + 陷阱块</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: url('6527007.jpg');
+      background-size: cover;
+      font-family: 'Comic Sans MS', 'cursive', sans-serif;
+      color: #ff80b3;
+    }
+
+    #box, .bad-box {
+      width: 80px;
+      height: 80px;
+      position: absolute;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 0 10px #ffcce0;
+    }
+
+    #box {
+      background: linear-gradient(145deg, #ffd6e7, #ffe5f3);
+      border: 3px dashed #ff99cc;
+      z-index: 2;
+    }
+
+    .bad-box {
+      background: linear-gradient(145deg, #dcb0ff, #f3e5ff);
+      border: 3px dashed #cc99ff;
+      z-index: 1;
+    }
+
+    #score, #timer {
+      position: fixed;
+      font-size: 26px;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px white;
+      padding: 10px;
+      background-color: rgba(255, 240, 245, 0.6);
+      border-radius: 10px;
+      border: 2px solid #ffb6d9;
+    }
+
+    #score { top: 10px; left: 10px; }
+    #timer { top: 10px; right: 10px; }
+
+    .hit-effect {
+      animation: pop 0.2s ease;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+//.star {
+  //position: fixed;
+ // font-size: 24px;
+ // animation: fall 2s ease forwards;
+ // pointer-events: none;
+//}
+.star {
+  width: 40px;
+  height: 40px;
+  position: fixed;
+  animation: fall 2s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes fall {
+  0% {
+    top: -30px;
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+    transform: scale(1.5) rotate(360deg);
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div id="score">🎂 得分：0</div>
+  <div id="timer">时间：200</div>
+  <div id="box"></div>
+  <div class="bad-box" id="bad1"></div>
+  <div class="bad-box" id="bad2"></div>
+
+  <!-- Sonidos -->
+  <audio id="clickSound" src="click.mp3" preload="auto"></audio>
+  <audio id="clickSoundBad" src="click1.mp3" preload="auto"></audio>
+
+  <script>
+    let score = 0;
+    let time = 200;
+    let gameOver = false;
+
+    const box = document.getElementById("box");
+    const badBoxes = [document.getElementById("bad1"), document.getElementById("bad2")];
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const clickSound = document.getElementById("clickSound");
+    const clickSoundBad = document.getElementById("clickSoundBad");
+
+    function moveBoxRandomly(element) {
+      const x = Math.random() * (window.innerWidth - element.offsetWidth);
+      const y = Math.random() * (window.innerHeight - element.offsetHeight);
+      element.style.left = x + "px";
+      element.style.top = y + "px";
+    }
+
+    box.addEventListener("click", () => {
+      if (gameOver) return;
+
+      clickSound.currentTime = 0;
+      clickSound.play();
+
+      box.classList.remove("hit-effect");
+      void box.offsetWidth;
+      box.classList.add("hit-effect");
+
+      score++;
+if (score === 120) {
+  triggerReward();
+}
+
+      scoreDisplay.textContent = "🎂 得分：" + score;
+
+      moveBoxRandomly(box);
+      badBoxes.forEach(moveBoxRandomly);
+
+score = 119;
+
+    });
+
+    badBoxes.forEach(bad => {
+      bad.addEventListener("click", () => {
+        if (gameOver) return;
+
+        clickSoundBad.currentTime = 0;
+        clickSoundBad.play();
+
+        score = Math.max(0, score - 1);
+        scoreDisplay.textContent = "🎂 得分：" + score;
+
+        moveBoxRandomly(box);
+        badBoxes.forEach(moveBoxRandomly);
+      });
+    });
+
+    const countdown = setInterval(() => {
+      time--;
+      timerDisplay.textContent = "时间：" + time;
+
+      if (time <= 0) {
+        clearInterval(countdown);
+        gameOver = true;
+        alert("游戏结束！你的得分是：" + score);
+        box.style.pointerEvents = "none";
+        badBoxes.forEach(b => b.style.pointerEvents = "none");
+      }
+    }, 1000);
+
+    // 初始位置
+    moveBoxRandomly(box);
+    badBoxes.forEach(moveBoxRandomly);
+function triggerReward() {
+  alert("🎉 恭喜你达到 120 分！奖励模式启动！");
+
+  for (let i = 0; i < 40; i++) {
+    const star = document.createElement("div");
+   star.className = "star";
+    //star.textContent = "✨";
+star.textContent = ["✨", "🌟", "💖", "🎉"]
+//[Math.floor(Math.random() * 4)];
+//const star = document.createElement("img");
+//star.src = "cupcake.png"; // 路径根据你自己的文件
+//star.className = "star";
+
+    star.style.left = Math.random() * window.innerWidth + "px";
+    star.style.top = "-30px";
+    document.body.appendChild(star);
+
+   setTimeout(() => {
+     star.remove();
+  }, 2000);
+  }
+}
+
+  </script>
+</body>
+</html>
